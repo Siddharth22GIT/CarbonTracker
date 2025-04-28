@@ -51,7 +51,7 @@
                                 <div class="progress progress-bar-target mb-2">
                                     <div class="progress-bar {{ 'bg-success' if progress_percent < 50 else ('bg-warning' if progress_percent < 75 else 'bg-danger') }}" 
                                          role="progressbar" 
-                                         style="width: {{ min(progress_percent, 100)|round|int }}%;"
+                                         style="width: {{ (progress_percent if progress_percent <= 100 else 100)|round|int }}%;"
                                          aria-valuenow="{{ progress_percent }}" 
                                          aria-valuemin="0" 
                                          aria-valuemax="100"
@@ -112,7 +112,7 @@
                                             <div class="progress progress-bar-target">
                                                 <div class="progress-bar {{ 'bg-success' if progress_percent < 50 else ('bg-warning' if progress_percent < 75 else 'bg-danger') }}" 
                                                      role="progressbar" 
-                                                     style="width: {{ min(progress_percent, 100)|round|int }}%;"
+                                                     style="width: {{ (progress_percent if progress_percent <= 100 else 100)|round|int }}%;"
                                                      aria-valuenow="{{ progress_percent }}" 
                                                      aria-valuemin="0" 
                                                      aria-valuemax="100"

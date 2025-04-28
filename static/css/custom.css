@@ -1,5 +1,50 @@
 /* Custom styling for Carbon Footprint Tracker */
 
+/* Global CO2 Ticker */
+.co2-ticker {
+    background-color: rgba(25, 25, 25, 0.95);
+    border-top: 1px solid var(--bs-gray-700);
+    border-bottom: 1px solid var(--bs-gray-700);
+    padding: 0.5rem 0;
+    transition: background-color 0.3s ease;
+}
+
+.co2-ticker:hover {
+    background-color: rgba(35, 35, 35, 0.95);
+}
+
+.co2-level {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+}
+
+.co2-trend {
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+}
+
+.co2-trend-up {
+    color: var(--bs-danger);
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.co2-trend-down {
+    color: var(--bs-success);
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.co2-trend-stable {
+    color: var(--bs-warning);
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.co2-date {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 /* Dashboard cards */
 .dashboard-card {
     transition: transform 0.3s ease;

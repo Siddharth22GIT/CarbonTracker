@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Reports{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="mb-1">Emission Reports</h1>
+            <p class="text-muted mb-0">Comprehensive analysis of your carbon emissions data</p>
+        </div>
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Date Range Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Select Date Range</h5>
+            <form class="filter-form" method="GET" action="{{ url_for('reports') }}">
+                <div class="row">
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <label for="from_date" class="form-label">From Date</label>
+                        <input type="date" name="from_date" id="from_date" class="form-control" value="{{ from_date }}">
+                    </div>
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <label for="to_date" class="form-label">To Date</label>
+                        <input type="date" name="to_date" id="to_date" class="form-control" value="{{ to_date }}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <a href="{{ url_for('generate_report_pdf') }}?from_date={{ from_date }}&to_date={{ to_date }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-file-pdf me-2"></i>Export PDF
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Emissions Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="bg-dark p-4 rounded-3">
+                                <i class="fas fa-cloud mb-2 text-info fa-2x"></i>
+                                <h3 class="mb-0">{{ "%.2f"|format(stats.total_emissions) }}</h3>
+                                <p class="text-muted mb-0">Total kg CO₂e</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <div class="bg-dark p-4 rounded-3">
+                                <i class="fas fa-tag mb-2 text-warning fa-2x"></i>
+                                <h3 class="mb-0">{{ stats.by_category|length }}</h3>
+                                <p class="text-muted mb-0">Categories</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-dark p-4 rounded-3">
+                                <i class="fas fa-calendar-alt mb-2 text-success fa-2x"></i>
+                                <h3 class="mb-0">{{ stats.monthly_trend|length }}</h3>
+                                <p class="text-muted mb-0">Months Tracked</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Category Breakdown -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Emissions by Category</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.by_category %}
+                        <div class="chart-container">
+                            <canvas id="categoryBreakdownChart"></canvas>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const ctx = document.getElementById('categoryBreakdownChart').getContext('2d');
+                                const categoryColors = {
+                                    energy: '#6610f2',
+                                    transportation: '#0d6efd',
+                                    manufacturing: '#6f42c1',
+                                    business_travel: '#20c997',
+                                    waste: '#198754',
+                                    water: '#0dcaf0',
+                                    other: '#adb5bd'
+                                };
+                                
+                                const data = {
+                                    labels: [
+                                        {% for category, value in stats.by_category %}
+                                            '{{ category|replace('_', ' ')|title }}',
+                                        {% endfor %}
+                                    ],
+                                    datasets: [{
+                                        data: [
+                                            {% for category, value in stats.by_category %}
+                                                {{ value }},
+                                            {% endfor %}
+                                        ],
+                                        backgroundColor: [
+                                            {% for category, value in stats.by_category %}
+                                                '{{ categoryColors[category] if category in categoryColors else '#495057' }}',
+                                            {% endfor %}
+                                        ],
+                                        borderWidth: 1
+                                    }]
+                                };
+                                
+                                new Chart(ctx, {
+                                    type: 'pie',
+                                    data: data,
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                position: 'right',
+                                                labels: {
+                                                    color: '#fff'
+                                                }
+                                            },
+                                            tooltip: {
+                                                callbacks: {
+                                                    label: function(context) {
+                                                        const label = context.label || '';
+                                                        const value = context.raw || 0;
+                                                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                                        const percentage = Math.round((value / total) * 100);
+                                                        return `${label}: ${value.toFixed(2)} kg CO2e (${percentage}%)`;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-pie fa-4x text-muted mb-3"></i>
+                            <p>No category breakdown data available for the selected period</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Trend -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Monthly Emissions Trend</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.monthly_trend %}
+                        <div class="chart-container">
+                            <canvas id="monthlyTrendChart"></canvas>
+                        </div>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+                                
+                                const data = {
+                                    labels: [
+                                        {% for month, value in stats.monthly_trend %}
+                                            '{{ month }}',
+                                        {% endfor %}
+                                    ],
+                                    datasets: [{
+                                        label: 'Monthly Emissions',
+                                        data: [
+                                            {% for month, value in stats.monthly_trend %}
+                                                {{ value }},
+                                            {% endfor %}
+                                        ],
+                                        borderColor: '#0dcaf0',
+                                        backgroundColor: 'rgba(13, 202, 240, 0.1)',
+                                        borderWidth: 2,
+                                        tension: 0.3,
+                                        fill: true
+                                    }]
+                                };
+                                
+                                new Chart(ctx, {
+                                    type: 'line',
+                                    data: data,
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: {
+                                                display: false
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                grid: {
+                                                    color: 'rgba(255, 255, 255, 0.1)'
+                                                },
+                                                ticks: {
+                                                    color: '#fff'
+                                                }
+                                            },
+                                            y: {
+                                                grid: {
+                                                    color: 'rgba(255, 255, 255, 0.1)'
+                                                },
+                                                ticks: {
+                                                    color: '#fff'
+                                                },
+                                                beginAtZero: true
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                            <p>No monthly trend data available for the selected period</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Highest Emissions Table -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Highest Emission Activities</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Emissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in stats.highest_emissions %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <h6 class="mb-0">{{ activity.title }}</h6>
+                                                <small class="text-muted">{{ activity.description|truncate(50) }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge category-{{ activity.category }}">{{ activity.category|replace('_', ' ')|title }}</span>
+                                        </td>
+                                        <td>{{ activity.date.strftime('%b %d, %Y') }}</td>
+                                        <td class="text-end font-weight-bold">{{ "%.2f"|format(activity.emission_value) }} {{ activity.emission_unit }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                                            <p>No emission data available for the selected period</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">Export Options</h5>
+                            <p class="text-muted mb-0">Download your emissions data in various formats</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('generate_report_pdf') }}?from_date={{ from_date }}&to_date={{ to_date }}" class="btn btn-primary me-2">
+                                <i class="fas fa-file-pdf me-2"></i>Export as PDF
+                            </a>
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-envelope me-2"></i>Email Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

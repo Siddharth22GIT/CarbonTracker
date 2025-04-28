@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Dashboard Welcome -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h1 class="mb-2">Welcome, {{ current_user.name }}</h1>
+            <p class="text-muted">Track and manage your organization's carbon footprint data</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('add_activity') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Activity
+            </a>
+        </div>
+    </div>
+    
+    <!-- Dashboard Stats -->
+    <div class="row mb-4">
+        <!-- Total Emissions -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 bg-primary bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-cloud text-primary fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-0">Total Emissions</h6>
+                            <span class="stats-counter">{{ "%.2f"|format(total_emissions) }}</span>
+                            <small class="text-muted">kg CO₂e</small>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0">All-time carbon emissions from all activities</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Count -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 bg-success bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-list-check text-success fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-0">Activities</h6>
+                            <span class="stats-counter">{{ recent_activities|length }}</span>
+                            <small class="text-muted">recent</small>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-0">Recent activities in your tracking system</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Target Status -->
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 bg-info bg-opacity-10 p-3 rounded-3">
+                            <i class="fas fa-bullseye text-info fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted text-uppercase mb-0">Target Status</h6>
+                            {% if target %}
+                                <span class="stats-counter">{{ "%.1f"|format((total_emissions / target.target_value) * 100) }}%</span>
+                                <small class="text-muted">of target</small>
+                            {% else %}
+                                <span class="stats-counter">No target</span>
+                                <small class="text-muted">set yet</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if target %}
+                        <div class="progress progress-bar-target mb-2">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ min(100, (total_emissions / target.target_value) * 100)|round|int }}%;"
+                                 aria-valuenow="{{ (total_emissions / target.target_value) * 100 }}" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="text-muted mb-0">{{ "%.2f"|format(total_emissions) }} of {{ "%.2f"|format(target.target_value) }} {{ target.target_unit }} by {{ target.target_date.strftime('%b %d, %Y') }}</p>
+                    {% else %}
+                        <p class="text-muted mb-0">Set an emissions target in the Targets section</p>
+                        <a href="{{ url_for('targets') }}" class="btn btn-sm btn-outline-info mt-2">Set Target</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Emissions by Category -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Emissions by Category</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="emissionsPieChart"></canvas>
+                    </div>
+                    <!-- Hidden data for chart -->
+                    <script id="chartData" type="application/json">{{ chart_data|safe }}</script>
+                    
+                    <!-- Categories list -->
+                    <h6 class="mt-3">Categories Breakdown:</h6>
+                    <ul class="list-group list-group-flush">
+                        {% for category, value in emissions_by_category %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ category|replace('_', ' ')|title }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ "%.2f"|format(value) }} kg</span>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item text-center">No emissions data available</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emissions Trend -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Emissions Trend</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="emissionsTrendChart"></canvas>
+                    </div>
+                    <!-- Hidden data for chart -->
+                    <script id="trendData" type="application/json">{{ trend_data|safe }}</script>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{{ url_for('activities') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-list me-1"></i> View All Activities
+                        </a>
+                        <a href="{{ url_for('reports') }}" class="btn btn-outline-info">
+                            <i class="fas fa-chart-line me-1"></i> Detailed Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Activities</h5>
+                    <a href="{{ url_for('add_activity') }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Add New
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Category</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Emissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activities %}
+                                    <tr class="activity-item">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0">{{ activity.title }}</h6>
+                                                    <small class="text-muted">{{ activity.description|truncate(50) }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge category-{{ activity.category }}">{{ activity.category|replace('_', ' ')|title }}</span>
+                                        </td>
+                                        <td>{{ activity.date.strftime('%b %d, %Y') }}</td>
+                                        <td class="text-end fw-bold">{{ "%.2f"|format(activity.emission_value) }} {{ activity.emission_unit }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                            <p>No activities recorded yet</p>
+                                            <a href="{{ url_for('add_activity') }}" class="btn btn-primary">Add Your First Activity</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a href="{{ url_for('activities') }}" class="btn btn-link">View All Activities <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

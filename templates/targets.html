@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Emission Targets{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="mb-1">Emission Targets</h1>
+            <p class="text-muted mb-0">Set and track goals for reducing your organization's carbon footprint</p>
+        </div>
+        <div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Current Target Status -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Target Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <h6>Current Overall Emissions</h6>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-dark p-3 rounded-3 me-3">
+                                    <i class="fas fa-cloud text-info fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h3 class="mb-0">{{ "%.2f"|format(total_emissions) }} kg CO₂e</h3>
+                                    <p class="text-muted mb-0">Total emissions across all categories</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Target Status</h6>
+                            {% set overall_target = targets|selectattr('category', 'equalto', 'overall')|list|first %}
+                            {% if overall_target %}
+                                {% set progress_percent = (total_emissions / overall_target.target_value) * 100 %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Progress: {{ "%.1f"|format(progress_percent) }}%</span>
+                                    <span>Target: {{ "%.2f"|format(overall_target.target_value) }} {{ overall_target.target_unit }}</span>
+                                </div>
+                                <div class="progress progress-bar-target mb-2">
+                                    <div class="progress-bar {{ 'bg-success' if progress_percent < 50 else ('bg-warning' if progress_percent < 75 else 'bg-danger') }}" 
+                                         role="progressbar" 
+                                         style="width: {{ min(progress_percent, 100)|round|int }}%;"
+                                         aria-valuenow="{{ progress_percent }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"
+                                         data-progress="{{ total_emissions }}"
+                                         data-target="{{ overall_target.target_value }}"></div>
+                                </div>
+                                <p class="text-muted">
+                                    Target deadline: {{ overall_target.target_date.strftime('%b %d, %Y') }}
+                                    {% if progress_percent > 100 %}
+                                        <span class="text-danger">You have exceeded your target! Consider setting a new one.</span>
+                                    {% endif %}
+                                </p>
+                            {% else %}
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    No overall emission target set yet. Use the form below to set your first target.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Targets -->
+    {% if targets|selectattr('category', 'ne', 'overall')|list %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Category-Specific Targets</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Target Value</th>
+                                    <th>Deadline</th>
+                                    <th>Current Status</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for target in targets if target.category != 'overall' %}
+                                    {% set category_emissions = emissions_by_category.get(target.category, 0) %}
+                                    {% set progress_percent = (category_emissions / target.target_value) * 100 if target.target_value > 0 else 0 %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge category-{{ target.category }}">{{ target.category|replace('_', ' ')|title }}</span>
+                                        </td>
+                                        <td>{{ "%.2f"|format(target.target_value) }} {{ target.target_unit }}</td>
+                                        <td>{{ target.target_date.strftime('%b %d, %Y') }}</td>
+                                        <td>{{ "%.2f"|format(category_emissions) }} {{ target.target_unit }}</td>
+                                        <td style="width: 30%;">
+                                            <div class="progress progress-bar-target">
+                                                <div class="progress-bar {{ 'bg-success' if progress_percent < 50 else ('bg-warning' if progress_percent < 75 else 'bg-danger') }}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ min(progress_percent, 100)|round|int }}%;"
+                                                     aria-valuenow="{{ progress_percent }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100"
+                                                     data-progress="{{ category_emissions }}"
+                                                     data-target="{{ target.target_value }}"></div>
+                                            </div>
+                                            <small class="text-muted">{{ "%.1f"|format(progress_percent) }}% of target</small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Set New Target -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Set New Emission Target</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.target_value.label(class="form-label") }}
+                                {% if form.target_value.errors %}
+                                    {{ form.target_value(class="form-control is-invalid", type="number", step="0.01") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.target_value.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.target_value(class="form-control", type="number", step="0.01", placeholder="Enter target emission value") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.target_unit.label(class="form-label") }}
+                                {% if form.target_unit.errors %}
+                                    {{ form.target_unit(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.target_unit.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.target_unit(class="form-select") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.category.label(class="form-label") }}
+                                {% if form.category.errors %}
+                                    {{ form.category(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.category(class="form-select") }}
+                                {% endif %}
+                                <div class="form-text">
+                                    Choose "Overall Emissions" for a company-wide target, or select a specific category
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.target_date.label(class="form-label") }}
+                                {% if form.target_date.errors %}
+                                    {{ form.target_date(class="form-control is-invalid", type="date") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.target_date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.target_date(class="form-control", type="date") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Target Guidelines -->
+            <div class="card mt-3 bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>
+                        Setting Effective Targets
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>For the most effective emission reduction strategy:</p>
+                    <ul>
+                        <li>Set an <strong>overall target</strong> for your organization's total emissions</li>
+                        <li>Add <strong>category-specific targets</strong> to focus efforts on high-impact areas</li>
+                        <li>Make targets <strong>challenging but achievable</strong> - typically 5-15% below current levels</li>
+                        <li>Set <strong>realistic deadlines</strong> that allow time for implementing changes</li>
+                        <li>Review and update targets regularly as you make progress</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

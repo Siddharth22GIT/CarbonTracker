@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold text-white mb-4">Track Your Company's Carbon Footprint</h1>
+                <p class="lead text-white-50 mb-5">Monitor, analyze, and reduce your organization's environmental impact with our comprehensive carbon tracking platform.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                            <i class="fas fa-chart-line me-2"></i>Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                            <i class="fas fa-user-plus me-2"></i>Get Started
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="fw-bold">Features and Benefits</h2>
+                <p class="lead text-muted">Our platform provides everything you need to track and manage your company's carbon emissions.</p>
+            </div>
+        </div>
+        <div class="row g-4 row-cols-1 row-cols-md-2 row-cols-lg-3">
+            <!-- Feature 1 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Comprehensive Tracking</h4>
+                        <p class="card-text text-muted">Record and monitor all types of carbon-emitting activities across your organization with detailed categorization.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-chart-pie fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Visual Analytics</h4>
+                        <p class="card-text text-muted">Gain insights with interactive charts and visualizations that help identify trends and areas for improvement.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-bullseye fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Goal Setting</h4>
+                        <p class="card-text text-muted">Set emission reduction targets and track your progress toward achieving your sustainability goals.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Detailed Reports</h4>
+                        <p class="card-text text-muted">Generate comprehensive reports for internal use or external stakeholders to showcase your environmental efforts.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature 5 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-industry fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Industry-Specific</h4>
+                        <p class="card-text text-muted">Tailored for various industries with industry-specific emission categories and benchmarking.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feature 6 -->
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mx-auto mb-3">
+                            <i class="fas fa-shield-alt fa-2x"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Secure & Private</h4>
+                        <p class="card-text text-muted">Your environmental data is kept secure and private with our robust authentication system.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-dark">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="fw-bold">How It Works</h2>
+                <p class="lead text-muted">Get started with carbon tracking in just a few simple steps.</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="text-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <h3 class="m-0 text-white">1</h3>
+                    </div>
+                    <h4>Register Your Company</h4>
+                    <p class="text-muted">Create an account for your organization to get started with tracking.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="text-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <h3 class="m-0 text-white">2</h3>
+                    </div>
+                    <h4>Log Your Activities</h4>
+                    <p class="text-muted">Record all carbon-emitting activities across your organization's operations.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <h3 class="m-0 text-white">3</h3>
+                    </div>
+                    <h4>Analyze & Optimize</h4>
+                    <p class="text-muted">Review analytics, set targets, and identify opportunities to reduce emissions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-9 mb-4 mb-lg-0">
+                <h2 class="fw-bold">Ready to reduce your carbon footprint?</h2>
+                <p class="lead mb-0">Join hundreds of companies already tracking and optimizing their emissions.</p>
+            </div>
+            <div class="col-lg-3 text-lg-end">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">Go to Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">Sign Up Now</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

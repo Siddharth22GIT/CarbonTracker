@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Activities{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="mb-1">Activity Log</h1>
+            <p class="text-muted mb-0">View and manage all recorded carbon-emitting activities</p>
+        </div>
+        <div>
+            <a href="{{ url_for('add_activity') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Activity
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-chart-line me-2"></i>Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filters Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Filter Activities</h5>
+            <form class="filter-form" method="GET" action="{{ url_for('activities') }}">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="category" class="form-label">Category</label>
+                        <select name="category" id="category" class="form-select">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>
+                                    {{ category|replace('_', ' ')|title }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label for="from_date" class="form-label">From Date</label>
+                        <input type="date" name="from_date" id="from_date" class="form-control" value="{{ from_date }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="to_date" class="form-label">To Date</label>
+                        <input type="date" name="to_date" id="to_date" class="form-control" value="{{ to_date }}">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Activities Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Activity</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Emissions</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                            <tr class="activity-item">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">{{ activity.title }}</h6>
+                                            <small class="text-muted">{{ activity.description|truncate(50) }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge category-{{ activity.category }}">{{ activity.category|replace('_', ' ')|title }}</span>
+                                </td>
+                                <td>{{ activity.date.strftime('%b %d, %Y') }}</td>
+                                <td>{{ "%.2f"|format(activity.emission_value) }} {{ activity.emission_unit }}</td>
+                                <td class="text-end">
+                                    <form action="{{ url_for('delete_activity', activity_id=activity.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this activity?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    {% if category_filter or from_date or to_date %}
+                                        <i class="fas fa-filter fa-3x text-muted mb-3"></i>
+                                        <p>No activities match your filter criteria</p>
+                                        <a href="{{ url_for('activities') }}" class="btn btn-outline-primary">Clear Filters</a>
+                                    {% else %}
+                                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                        <p>No activities recorded yet</p>
+                                        <a href="{{ url_for('add_activity') }}" class="btn btn-primary">Add Your First Activity</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if activities %}
+        <div class="card-footer d-flex justify-content-between">
+            <div>
+                <small class="text-muted">
+                    <strong>{{ activities|length }}</strong> activities found
+                    {% if category_filter or from_date or to_date %}
+                        <a href="{{ url_for('activities') }}" class="ms-2">
+                            <i class="fas fa-times me-1"></i>Clear filters
+                        </a>
+                    {% endif %}
+                </small>
+            </div>
+            <a href="{{ url_for('reports') }}" class="btn btn-outline-info btn-sm">
+                <i class="fas fa-chart-bar me-1"></i> View Reports
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

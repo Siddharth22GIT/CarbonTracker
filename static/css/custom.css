@@ -1,0 +1,107 @@
+/* Custom styling for Carbon Footprint Tracker */
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: transform 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Stats counter */
+.stats-counter {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+/* Activity tags */
+.activity-tag {
+    border-radius: 50px;
+    padding: 0.35em 0.8em;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Progress bar for targets */
+.progress-bar-target {
+    height: 1rem;
+    border-radius: 0.5rem;
+}
+
+/* Custom chart container */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+/* Activity item in list */
+.activity-item {
+    transition: background-color 0.2s ease;
+}
+
+.activity-item:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Category badges */
+.category-energy {
+    background-color: var(--bs-indigo);
+}
+
+.category-transportation {
+    background-color: var(--bs-blue);
+}
+
+.category-manufacturing {
+    background-color: var(--bs-purple);
+}
+
+.category-business_travel {
+    background-color: var(--bs-teal);
+}
+
+.category-waste {
+    background-color: var(--bs-green);
+}
+
+.category-water {
+    background-color: var(--bs-cyan);
+}
+
+.category-other {
+    background-color: var(--bs-gray);
+}
+
+/* Hero section on homepage */
+.hero-section {
+    padding: 5rem 0;
+    background-color: var(--bs-gray-900);
+}
+
+/* Feature icons */
+.feature-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    background-color: var(--bs-gray-800);
+    color: var(--bs-info);
+}
+
+/* Responsive font adjustments */
+@media (max-width: 768px) {
+    .stats-counter {
+        font-size: 1.75rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+}

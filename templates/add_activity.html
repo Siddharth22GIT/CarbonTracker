@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Carbon Footprint Tracker - Add Activity{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Page Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h1 class="mb-1">Add New Activity</h1>
+                    <p class="text-muted mb-0">Record a new carbon-emitting activity for your organization</p>
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Activity Form Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body p-4">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {% if form.title.errors %}
+                                {{ form.title(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.title.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.title(class="form-control", placeholder="Enter activity title") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.category.label(class="form-label") }}
+                                {% if form.category.errors %}
+                                    {{ form.category(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.category(class="form-select") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.date.label(class="form-label") }}
+                                {% if form.date.errors %}
+                                    {{ form.date(class="form-control is-invalid", type="date") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.date(class="form-control", type="date") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {% if form.description.errors %}
+                                {{ form.description(class="form-control is-invalid", rows=3) }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.description(class="form-control", rows=3, placeholder="Describe the activity in detail (optional)") }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.emission_value.label(class="form-label") }}
+                                {% if form.emission_value.errors %}
+                                    {{ form.emission_value(class="form-control is-invalid", type="number", step="0.01") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.emission_value.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.emission_value(class="form-control", type="number", step="0.01", placeholder="Enter emission amount") }}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.emission_unit.label(class="form-label") }}
+                                {% if form.emission_unit.errors %}
+                                    {{ form.emission_unit(class="form-select is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.emission_unit.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.emission_unit(class="form-select") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Guidance Card -->
+            <div class="card bg-dark mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Emission Tracking Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-info">What activities should I track?</h6>
+                    <p>Record activities that produce greenhouse gas emissions, including:</p>
+                    <ul>
+                        <li>Energy consumption (electricity, gas, etc.)</li>
+                        <li>Transportation (company vehicles, shipping, etc.)</li>
+                        <li>Manufacturing processes</li>
+                        <li>Business travel (flights, car rentals, etc.)</li>
+                        <li>Waste management</li>
+                        <li>Water usage</li>
+                    </ul>
+                    
+                    <h6 class="text-info">How to calculate emissions?</h6>
+                    <p>For accurate emissions calculation:</p>
+                    <ul>
+                        <li>Use utility bills for energy consumption</li>
+                        <li>Track fuel usage for transportation</li>
+                        <li>Follow industry standards for manufacturing</li>
+                        <li>Record mileage and transportation type for travel</li>
+                    </ul>
+                    
+                    <p class="mb-0 text-muted">
+                        <small>For more detailed guidance, consult the Greenhouse Gas Protocol or industry-specific resources.</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

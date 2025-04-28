@@ -6,6 +6,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 from sqlalchemy import func
 import json
+import logging
 from utils import get_emission_stats, generate_pdf, get_global_co2_data
 
 def register_routes(app):
@@ -14,6 +15,26 @@ def register_routes(app):
     def index():
         # Get global CO2 data for the ticker
         global_co2_data = get_global_co2_data()
+        
+        # Debug: Log the CO2 data to console
+        logging.debug(f"CO2 Data: {global_co2_data}")
+        
+        # Ensure the data is properly formatted for the template
+        if global_co2_data and 'co2_level' in global_co2_data:
+            logging.debug("CO2 data contains the required fields")
+        else:
+            logging.error("CO2 data is missing required fields")
+            # Provide default data structure to prevent template errors
+            global_co2_data = {
+                "success": True,
+                "co2_level": 420.0,
+                "trend": "up",
+                "trend_value": 2.5,
+                "date": "Current data",
+                "source": "Fallback for debugging",
+                "unit": "ppm"
+            }
+            
         return render_template('index.html', title='Carbon Footprint Tracker', global_co2_data=global_co2_data)
     
     @app.route('/register', methods=['GET', 'POST'])

@@ -4,39 +4,34 @@
 
 {% block content %}
 <!-- Global CO2 Ticker -->
-{% if global_co2_data %}
-<div class="co2-ticker">
+<div class="bg-dark py-3 border-bottom border-secondary mb-0">
     <div class="container">
-        <div class="d-flex align-items-center justify-content-between flex-wrap">
-            <div class="d-flex align-items-center">
-                <span class="badge bg-info me-2">GLOBAL CO₂</span>
-                <span class="co2-level">{{ global_co2_data.co2_level|round(2) }} {{ global_co2_data.unit }}</span>
-                
-                {% if global_co2_data.trend == "up" %}
-                <span class="co2-trend co2-trend-up">
-                    <i class="fas fa-arrow-up me-1"></i>
-                    {% if global_co2_data.trend_value %}+{{ global_co2_data.trend_value|round(2) }}{% endif %}
-                </span>
-                {% elif global_co2_data.trend == "down" %}
-                <span class="co2-trend co2-trend-down">
-                    <i class="fas fa-arrow-down me-1"></i>
-                    {% if global_co2_data.trend_value %}-{{ global_co2_data.trend_value|round(2) }}{% endif %}
-                </span>
-                {% else %}
-                <span class="co2-trend co2-trend-stable">
-                    <i class="fas fa-minus me-1"></i>
-                    STABLE
-                </span>
-                {% endif %}
-            </div>
-            <div class="d-flex align-items-center text-muted co2-date">
-                <span>Last update: {{ global_co2_data.date }}</span>
-                <span class="ms-3">Source: {{ global_co2_data.source }}</span>
+        <div class="row">
+            <div class="col-12">
+                <h5 class="text-info mb-0">
+                    <i class="fas fa-globe me-2"></i> Global CO₂ Levels: 
+                    {% if global_co2_data %}
+                        <span class="text-white">{{ global_co2_data.co2_level|round(2) }} {{ global_co2_data.unit }}</span>
+                        {% if global_co2_data.trend == "up" %}
+                            <span class="text-danger">
+                                <i class="fas fa-arrow-up"></i>
+                                {% if global_co2_data.trend_value %}+{{ global_co2_data.trend_value|round(2) }}{% endif %}
+                            </span>
+                        {% elif global_co2_data.trend == "down" %}
+                            <span class="text-success">
+                                <i class="fas fa-arrow-down"></i>
+                                {% if global_co2_data.trend_value %}-{{ global_co2_data.trend_value|round(2) }}{% endif %}
+                            </span>
+                        {% endif %}
+                        <small class="text-muted ms-3">Source: {{ global_co2_data.source }}</small>
+                    {% else %}
+                        <span class="text-white">Loading data...</span>
+                    {% endif %}
+                </h5>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 
 <!-- Hero Section -->
 <section class="hero-section">

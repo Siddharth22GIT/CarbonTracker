@@ -35,7 +35,7 @@ def get_emission_stats(company_id, from_date=None, to_date=None):
     
     # Get monthly trend
     monthly_trend = query.with_entities(
-        func.strftime('%Y-%m', Activity.date).label('month'),
+        func.to_char(Activity.date, 'YYYY-MM').label('month'),
         func.sum(Activity.emission_value).label('total')
     ).group_by('month').order_by('month').all()
     

@@ -6,13 +6,15 @@ from flask_login import login_user, current_user, logout_user, login_required
 from datetime import datetime
 from sqlalchemy import func
 import json
-from utils import get_emission_stats, generate_pdf
+from utils import get_emission_stats, generate_pdf, get_global_co2_data
 
 def register_routes(app):
     
     @app.route('/')
     def index():
-        return render_template('index.html', title='Carbon Footprint Tracker')
+        # Get global CO2 data for the ticker
+        global_co2_data = get_global_co2_data()
+        return render_template('index.html', title='Carbon Footprint Tracker', global_co2_data=global_co2_data)
     
     @app.route('/register', methods=['GET', 'POST'])
     def register():

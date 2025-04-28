@@ -1,7 +1,12 @@
 from flask import flash
 from sqlalchemy import func
 from datetime import datetime
+import requests
+import trafilatura
+import re
 from models import Activity
+import json
+import logging
 
 def get_emission_stats(company_id, from_date=None, to_date=None):
     """
@@ -48,6 +53,156 @@ def get_emission_stats(company_id, from_date=None, to_date=None):
         'monthly_trend': monthly_trend,
         'highest_emissions': highest_emissions
     }
+
+def get_global_co2_data():
+    """
+    Fetches current global CO2 levels data from reliable sources.
+    Returns a dict with current CO2 level, trend (up/down), and historical context.
+    """
+    try:
+        # First attempt to get data from NOAA Global Monitoring Laboratory
+        url = "https://gml.noaa.gov/webdata/ccgg/trends/co2/co2_trend_gl.txt"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            # Parse the data (last line is the most recent)
+            lines = response.text.strip().split('\n')
+            data_lines = [line for line in lines if not line.startswith('#') and line.strip()]
+            
+            if data_lines:
+                # Get the most recent data
+                latest_data = data_lines[-1].split()
+                if len(latest_data) >= 2:
+                    # Format: Year Month Day CO2-level
+                    year = latest_data[0]
+                    month = int(latest_data[1])
+                    co2_level = float(latest_data[3])
+                    
+                    # Get historical data for context (one year ago)
+                    one_year_ago = None
+                    for line in reversed(data_lines):
+                        parts = line.split()
+                        if len(parts) >= 4 and int(parts[0]) == int(year) - 1 and int(parts[1]) == month:
+                            one_year_ago = float(parts[3])
+                            break
+                            
+                    # Determine trend
+                    trend = "stable"
+                    trend_value = 0
+                    if one_year_ago:
+                        trend_value = co2_level - one_year_ago
+                        if trend_value > 0:
+                            trend = "up"
+                        elif trend_value < 0:
+                            trend = "down"
+                            
+                    # Format date
+                    month_names = ["", "January", "February", "March", "April", "May", "June", 
+                                 "July", "August", "September", "October", "November", "December"]
+                    date_str = f"{month_names[month]} {year}"
+                    
+                    return {
+                        "success": True,
+                        "co2_level": co2_level,
+                        "trend": trend,
+                        "trend_value": abs(trend_value),
+                        "date": date_str,
+                        "source": "NOAA Global Monitoring Laboratory",
+                        "unit": "ppm",
+                        "historical": {
+                            "one_year_ago": one_year_ago
+                        }
+                    }
+        
+        # Fallback to Mauna Loa Observatory data
+        url = "https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/co2_mlo_weekly.txt"
+        response = requests.get(url, timeout=10)
+        
+        if response.status_code == 200:
+            lines = response.text.strip().split('\n')
+            data_lines = [line for line in lines if not line.startswith('#') and line.strip()]
+            
+            if data_lines:
+                latest_data = data_lines[-1].split()
+                if len(latest_data) >= 5:
+                    year = latest_data[0]
+                    month = int(latest_data[1])
+                    co2_level = float(latest_data[4])
+                    
+                    # Get trend (compare to previous week)
+                    trend = "stable"
+                    trend_value = 0
+                    if len(data_lines) > 1:
+                        prev_data = data_lines[-2].split()
+                        if len(prev_data) >= 5:
+                            prev_co2 = float(prev_data[4])
+                            trend_value = co2_level - prev_co2
+                            if trend_value > 0:
+                                trend = "up"
+                            elif trend_value < 0:
+                                trend = "down"
+                    
+                    # Format date
+                    month_names = ["", "January", "February", "March", "April", "May", "June", 
+                                 "July", "August", "September", "October", "November", "December"]
+                    date_str = f"{month_names[month]} {year}"
+                    
+                    return {
+                        "success": True,
+                        "co2_level": co2_level,
+                        "trend": trend,
+                        "trend_value": abs(trend_value),
+                        "date": date_str,
+                        "source": "Mauna Loa Observatory",
+                        "unit": "ppm"
+                    }
+        
+        # If both direct sources fail, try to scrape from CO2.Earth
+        url = "https://www.co2.earth/"
+        downloaded = trafilatura.fetch_url(url)
+        text = trafilatura.extract(downloaded)
+        
+        if text:
+            # Try to extract the current CO2 value using regex
+            co2_match = re.search(r'(\d{3}\.\d{2})\s*ppm', text)
+            if co2_match:
+                co2_level = float(co2_match.group(1))
+                
+                return {
+                    "success": True,
+                    "co2_level": co2_level,
+                    "trend": "unknown",  # Can't determine trend from this source
+                    "date": "Recent data",
+                    "source": "CO2.Earth",
+                    "unit": "ppm"
+                }
+        
+        # If all fails, return a fallback with the most recent known value
+        # This ensures the user always sees some data
+        return {
+            "success": True,
+            "co2_level": 420.0,  # Approximate current value as of 2023
+            "trend": "up",
+            "trend_value": 2.5,
+            "date": "Recent estimate",
+            "source": "Fallback data based on recent trends",
+            "unit": "ppm",
+            "is_fallback": True
+        }
+        
+    except Exception as e:
+        logging.error(f"Error fetching global CO2 data: {str(e)}")
+        # Return fallback data
+        return {
+            "success": False,
+            "error": str(e),
+            "co2_level": 420.0,  # Approximate current value
+            "trend": "up",
+            "date": "Recent estimate",
+            "source": "Fallback data",
+            "unit": "ppm",
+            "is_fallback": True
+        }
 
 def generate_pdf(company, stats, from_date, to_date):
     """

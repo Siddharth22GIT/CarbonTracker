@@ -87,9 +87,9 @@ def register_routes(app):
             'data': [float(val) for _, val in emissions_by_category]
         }
         
-        # Monthly emissions for trend chart
+        # Monthly emissions for trend chart (using SQLite date functions)
         monthly_emissions = db.session.query(
-            func.to_char(Activity.date, 'YYYY-MM').label('month'),
+            func.strftime('%Y-%m', Activity.date).label('month'),
             func.sum(Activity.emission_value).label('total')
         ).filter_by(company_id=current_user.id)\
          .group_by('month')\

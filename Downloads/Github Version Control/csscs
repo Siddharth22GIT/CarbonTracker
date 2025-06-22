@@ -1,0 +1,60 @@
+[33mcommit 70fc79aaa6e7f4b30602a9364c61bd15848ca851[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Tue Mar 4 00:18:16 2025 +0530
+
+    fix the first bug
+
+[33mcommit 3003168208909ff4faf4c41930e90683fa11770d[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Tue Mar 4 00:16:28 2025 +0530
+
+    add content to file 4
+
+[33mcommit dd4c65b7d7076990dbb43a68e96a5498c440b329[m[33m ([m[1;32mdarkweb[m[33m)[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Tue Mar 4 00:13:41 2025 +0530
+
+    add code for otp generation in file 3.
+
+[33mcommit 7b16f99d2b427eda579c51d8f604ab1fdb9d514b[m
+Merge: 9d767c5 0b61e0a
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Tue Mar 4 00:03:31 2025 +0530
+
+    Merge branch 'bug-fix'
+
+[33mcommit 0b61e0a6b457c0006b629d0e69bc1d5502ff0aaa[m[33m ([m[1;32mbug-fix[m[33m)[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Mon Mar 3 23:57:02 2025 +0530
+
+    add to html file.
+
+[33mcommit e7a78f9f33bc1857b2ccdf25ec4f3ae4cb2cef95[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Mon Mar 3 23:25:09 2025 +0530
+
+    add an html file on branch bug-fix in folder two
+
+[33mcommit 9d767c5873bdca1c19ce1913a32a8a78ad1163b3[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Mon Mar 3 11:33:34 2025 +0530
+
+    add functions to file 1
+
+[33mcommit fcff1ab9be2baf2206c50456792b9bb8f93f674d[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Mon Mar 3 11:29:27 2025 +0530
+
+    add content to file 2
+
+[33mcommit ad7fe48cefdcf69c311519db524eb2e10a2789eb[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Sat Mar 1 23:14:05 2025 +0530
+
+    add content to file 2
+
+[33mcommit b5c13e0b6ae1fe2f473e1303f689963ac11613fe[m
+Author: SiddharthMishra <siddharthmishra10e@gmail.com>
+Date:   Sat Mar 1 23:08:31 2025 +0530
+
+    commit successful
